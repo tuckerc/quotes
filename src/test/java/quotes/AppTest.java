@@ -3,12 +3,23 @@
  */
 package quotes;
 
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class AppTest {
-    @Test public void testAppHasAGreeting() {
-        App classUnderTest = new App();
-        assertNotNull("app should have a greeting", classUnderTest.getGreeting());
-    }
+
+  App testApp = new App();
+  String expected = testApp.getQuote();
+
+  @Before
+  public void setUp() throws Exception {
+
+  }
+
+  @Test
+  public void testGetQuote() {
+    Assert.assertTrue(expected.contains("Author"));
+    Assert.assertTrue(expected.contains("Quote"));
+  }
 }
