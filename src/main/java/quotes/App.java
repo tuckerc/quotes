@@ -5,38 +5,74 @@ package quotes;
 
 import com.google.gson.Gson;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 
 public class App {
-    public static void main(String[] args) {
 
+  public static void main(String[] args) {
 
-      System.out.println(getQuote());
+      System.out.println(getBreakingBadQuote());
 
-    }
+  }
 
-    public static String getQuote() {
+  public static String getBreakingBadQuote() {
 
-      Gson gson = new Gson();
-
-      Quote[] quote = null;
+    try {
+      URL url = new URL("https://breaking-bad-quotes.herokuapp.com/v1/quotes");
+      Gson BBGson = new Gson();
+      BreakingBadQuote[] BBQuote = null;
+      HttpURLConnection con = null;
+      BufferedReader in = null;
 
       try {
-        File file = new File("assets/recentquotes.json");
-        FileReader reader = new FileReader(file);
-        quote = gson.fromJson(reader, Quote[].class);
-      } catch (FileNotFoundException e) {
-        System.out.println("file not found " + e);
+        con = (HttpURLConnection) url.openConnection();
+        in = new BufferedReader(
+            new InputStreamReader(con.getInputStream()));
+        BBQuote = BBGson.fromJson(in, BreakingBadQuote[].class);
+        return BBQuote[0].toString();
+      } catch (IOException e) {
+        return getJSONQuote();
+      } finally {
+        try {
+          Gson JSONGson = new Gson();
+          ArrayList<RecentQuote> quotes = new ArrayList<>();
+          File file = new File("assets/recentquotes.json");
+          FileReader reader = new FileReader(file);
+          quotes = JSONGson.fromJson(reader, ArrayList.class);
+          RecentQuote convertedQuote = new RecentQuote( BBQuote[0].author, BBQuote[0].quote);
+          quotes.add(convertedQuote);
+          String convertedJSON = JSONGson.toJson(quotes);
+          BufferedWriter writer = new BufferedWriter(new FileWriter("assets/recentquotes.json"));
+          writer.write(convertedJSON);
+        } catch (FileNotFoundException e) {
+          System.out.println("JSON file not found\n" + e);
+          e.printStackTrace();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
       }
-
-      int quoteNum = (int) (Math.random() * quote.length);
-
-      String returnQuote = "Author: " + quote[quoteNum].author + "\n" + "Quote: " + quote[quoteNum].text;
-
-      return returnQuote;
-
+    } catch (MalformedURLException e) {
+      return getJSONQuote();
     }
+  }
 
+  private static String getJSONQuote() {
+
+    try {
+      Gson gson = new Gson();
+      RecentQuote[] quote = new RecentQuote[]{};
+      File file = new File("assets/recentquotes.json");
+      FileReader reader = new FileReader(file);
+      quote = gson.fromJson(reader, RecentQuote[].class);
+      int quoteNum = (int) (Math.random() * quote.length);
+      return quote[quoteNum].toString();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      return "JSON file not found\n" + e;
+    }
+  }
 }
