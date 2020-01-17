@@ -15,10 +15,8 @@ import java.net.URL;
 public class App {
     public static void main(String[] args) {
 
-
-      //System.out.println(getLocalQuote());
-      getAPIQuote();
-
+        getAPIQuote();
+        
     }
 
     public static String getLocalQuote() {
@@ -70,8 +68,8 @@ public class App {
             }
             //System.out.println("woooot.  :)");
         } catch (IOException e) {
-            System.out.println("the internet did not work.");
-            e.printStackTrace();
+            System.out.println("Offline - printing local quote.");
+            System.out.println(getLocalQuote());
         }
     }
 
