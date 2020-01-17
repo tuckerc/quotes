@@ -4,20 +4,24 @@
 package quotes;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonStreamParser;
+import netscape.javascript.JSObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class App {
     public static void main(String[] args) {
 
 
-      System.out.println(getQuote());
+      //System.out.println(getLocalQuote());
+      getAPIQuote();
 
     }
 
-    public static String getQuote() {
+    public static String getLocalQuote() {
 
       Gson gson = new Gson();
 
@@ -37,6 +41,38 @@ public class App {
 
       return returnQuote;
 
+    }
+
+    public static void getAPIQuote() {
+
+        Gson gson = new Gson();
+
+        URL url = null;
+
+        APIQuote quoteFromAPI = null;
+
+        try {
+            url = new URL("https://favqs.com/api/qotd");
+        } catch (MalformedURLException e) {
+            System.out.println("bad url");
+            return;
+        }
+        try {
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream()));
+            String currentline = in.readLine();
+            while (currentline != null) {
+                //System.out.println(currentline);
+                quoteFromAPI = gson.fromJson(currentline, APIQuote.class);
+                System.out.println(quoteFromAPI);
+                currentline = in.readLine();
+            }
+            //System.out.println("woooot.  :)");
+        } catch (IOException e) {
+            System.out.println("the internet did not work.");
+            e.printStackTrace();
+        }
     }
 
 }
