@@ -16,7 +16,7 @@ public class App {
     public static void main(String[] args) {
 
         getAPIQuote();
-        
+
     }
 
     public static String getLocalQuote() {
@@ -64,6 +64,7 @@ public class App {
                 //System.out.println(currentline);
                 quoteFromAPI = gson.fromJson(currentline, APIQuote.class);
                 System.out.println(quoteFromAPI);
+
                 currentline = in.readLine();
             }
             //System.out.println("woooot.  :)");
