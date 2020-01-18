@@ -9,7 +9,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class App {
 
@@ -39,14 +39,15 @@ public class App {
       } finally {
         try {
           Gson JSONGson = new Gson();
-          ArrayList<RecentQuote> quotes = new ArrayList<>();
-          File file = new File("assets/recentquotes.json");
-          FileReader reader = new FileReader(file);
-          quotes = JSONGson.fromJson(reader, ArrayList.class);
-          RecentQuote convertedQuote = new RecentQuote( BBQuote[0].author, BBQuote[0].quote);
-          quotes.add(convertedQuote);
-          String convertedJSON = JSONGson.toJson(quotes);
-          BufferedWriter writer = new BufferedWriter(new FileWriter("assets/recentquotes.json"));
+          RecentQuote[] quotes = JSONGson.fromJson(new FileReader("assets/recentquotes.json"), RecentQuote[].class);
+          RecentQuote convertedQuote = null;
+          if (BBQuote != null) {
+            convertedQuote = new RecentQuote( BBQuote[0].author, BBQuote[0].quote);
+          }
+          RecentQuote[] updatedQuotes = Arrays.copyOf(quotes, quotes.length + 1);
+          updatedQuotes[updatedQuotes.length - 1] = convertedQuote;
+          String convertedJSON = JSONGson.toJson(updatedQuotes);
+          BufferedWriter writer = new BufferedWriter(new FileWriter("assets/updatedQuotes.json"));
           writer.write(convertedJSON);
         } catch (FileNotFoundException e) {
           System.out.println("JSON file not found\n" + e);
