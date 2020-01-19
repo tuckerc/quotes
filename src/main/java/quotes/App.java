@@ -61,11 +61,11 @@ public class App {
     }
   }
 
-  private static String getJSONQuote() {
+  public static String getJSONQuote() {
 
     try {
       Gson gson = new Gson();
-      RecentQuote[] quote = new RecentQuote[]{};
+      RecentQuote[] quote;
       File file = new File("assets/recentquotes.json");
       FileReader reader = new FileReader(file);
       quote = gson.fromJson(reader, RecentQuote[].class);

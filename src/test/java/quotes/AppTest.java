@@ -3,23 +3,79 @@
  */
 package quotes;
 
+import com.google.gson.Gson;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class AppTest {
 
-  App testApp = new App();
-  String expected = testApp.getQuote();
+  String breakingBadQuote = "";
+  String jsonQuote = "";
 
   @Before
-  public void setUp() throws Exception {
-
+  public void setUp() {
+    breakingBadQuote = App.getBreakingBadQuote();
+    jsonQuote = App.getJSONQuote();
   }
 
   @Test
-  public void testGetQuote() {
-    Assert.assertTrue(expected.contains("Author"));
-    Assert.assertTrue(expected.contains("Quote"));
+  public void testBreakingBadConstructor() {
+    try {
+      URL url = new URL("https://breaking-bad-quotes.herokuapp.com/v1/quotes");
+      Gson BBGson = new Gson();
+      BreakingBadQuote[] BBQuote = null;
+      HttpURLConnection con = null;
+      BufferedReader in = null;
+
+      try {
+        con = (HttpURLConnection) url.openConnection();
+        in = new BufferedReader(
+            new InputStreamReader(con.getInputStream()));
+        BBQuote = BBGson.fromJson(in, BreakingBadQuote[].class);
+        Assert.assertTrue(BBQuote[0].author != null);
+        Assert.assertTrue(BBQuote[0].quote != null);
+      } catch (IOException e) {
+        System.out.println("Couldn't connect to the API " + e);
+        e.printStackTrace();
+      }
+    } catch (MalformedURLException e) {
+      System.out.println("Malformed URL: " + e);
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testBreakingBadQuote() {
+    Assert.assertTrue(breakingBadQuote.contains("Quote:"));
+    Assert.assertTrue(breakingBadQuote.contains("By:"));
+  }
+
+  @Test
+  public void testRecentQuoteConstructor() {
+    try {
+      Gson gson = new Gson();
+      RecentQuote[] quote;
+      File file = new File("assets/recentquotes.json");
+      FileReader reader = new FileReader(file);
+      quote = gson.fromJson(reader, RecentQuote[].class);
+      int quoteNum = (int) (Math.random() * quote.length);
+      Assert.assertTrue(quote[quoteNum].author != null);
+      Assert.assertTrue(quote[quoteNum].text != null);
+    } catch (FileNotFoundException e) {
+      System.out.println("JSON file not found\n" + e);
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testJSONQuote() {
+    Assert.assertTrue(jsonQuote.contains("Quote:"));
+    Assert.assertTrue(jsonQuote.contains("By:"));
   }
 }
